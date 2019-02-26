@@ -1,21 +1,19 @@
 # Offical Docker PHP & Apache image https://hub.docker.com/_/php/
-# To do: fix compatiability with php 7
-FROM php:5.6-apache
+FROM php:7.0-apache
 
 # Install deps
 RUN apt-get update && apt-get install -y \
               libcurl4-gnutls-dev \
-              php5-curl \
-              php5-json \
-              php5- mcrypt \
-              php5-mysql \
               libmcrypt-dev \
+              libmosquitto-dev \
               git-core
 
 # Enable PHP modules
-RUN docker-php-ext-install -j$(nproc) mysql mysqli curl json mcrypt gettext
-RUN pecl install redis-2.2.8 \
+RUN docker-php-ext-install -j$(nproc) mysqli curl json mcrypt gettext
+RUN pecl install redis-3.1.6 \
   \ && docker-php-ext-enable redis
+RUN pecl install Mosquitto-0.4.0 \
+  \ && docker-php-ext-enable mosquitto
 
 RUN a2enmod rewrite
 
@@ -30,7 +28,7 @@ COPY config/php.ini /usr/local/etc/php/
 RUN git clone https://github.com/emoncms/emoncms.git /var/www/html
 RUN git clone https://github.com/emoncms/dashboard.git /var/www/html/Modules/dashboard
 RUN git clone https://github.com/emoncms/graph.git /var/www/html/Modules/graph
-
+RUN git clone https://github.com/emoncms/app.git /var/www/html/Modules/app
 
 COPY docker.settings.php /var/www/html/settings.php
 
@@ -51,5 +49,3 @@ RUN chmod 666 /var/log/emoncms.log
 # Add Pecl :
 # - dio
 # - Swiftmailer
-# - redis
-# - mqtt
